@@ -14,24 +14,24 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Clone sidewinder
-        run: git clone --depth 1 --branch v0.1.7 https://github.com/Pinjontall94/sidewinder.git $GITHUB_WORKSPACE/sidewinder
+        run: git clone --depth 1 --branch v0.1.7 https://github.com/Pinjontall94/sidewinder.git
 
       - name: Install dependencies
-        working-directory: $GITHUB_WORKSPACE/sidewinder
+        working-directory: ./sidewinder
         run: python3 -m venv venv && venv/bin/pip3 install -r requirements.txt
 
       - name: Populate content, static, and template
         run: cp -r content static template.html -t $GITHUB_WORKSPACE/sidewinder
 
       - name: Build site
-        working-directory: $GITHUB_WORKSPACE/sidewinder
+        working-directory: ./sidewinder
         run: venv/bin/python3 src/main.py
 
       - name: Upload static files as artifact
         id: deployment
         uses: actions/upload-pages-artifact@v3 # or specific "vX.X.X" version tag for this action
         with:
-          path: "$GITHUB_WORKSPACE/sidewinder/public/"
+          path: "./sidewinder/public/"
 
   deploy:
     needs: build
