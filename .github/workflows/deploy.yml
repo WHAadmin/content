@@ -9,7 +9,6 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -28,7 +27,7 @@ jobs:
         working-directory: $GITHUB_WORKSPACE/sidewinder
         run: venv/bin/python3 src/main.py
 
-     - name: Upload static files as artifact
+      - name: Upload static files as artifact
         id: deployment
         uses: actions/upload-pages-artifact@v3 # or specific "vX.X.X" version tag for this action
         with:
