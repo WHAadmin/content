@@ -19,8 +19,9 @@ jobs:
 
       - name: Install dependencies
         working-directory: $GITHUB_WORKSPACE/sidewinder
-        run: python3 -m venv venv
-        run: venv/bin/pip3 install -r requirements.txt
+        run: |
+        python3 -m venv venv
+        venv/bin/pip3 install -r requirements.txt
 
       - name: Populate content, static, and template
         run: cp -r content static template.html -t $GITHUB_WORKSPACE/sidewinder
