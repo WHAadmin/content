@@ -1,9 +1,11 @@
-name: CI
+name: CD
 
 # Controls when the workflow will run
 on:
   # Triggers the workflow on push events but only for the "main" branch
   push:
+    branches: [ "main" ]
+  pull-request:
     branches: [ "main" ]
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -20,15 +22,46 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v4
 
-      - name: Set up sidewinder
-        shell: bash
-        run: |
-          git clone --depth 1 --branch v0.1.7 https://github.com/Pinjontall94/sidewinder.git
-          cp -r content static template.html -t sidewinder/
-          cd sidewinder && python3 -m venv venv
-          venv/bin/pip3 install -r requirements.txt
+      - name: Clone sidewinder
+        run: git clone --depth 1 --branch v0.1.7 https://github.com/Pinjontall94/sidewinder.git $GITHUB_WORKSPACE/sidewinder
+
+      - name: Install dependencies
+        working-directory: $GITHUB_WORKSPACE/sidewinder
+        run: python3 -m venv venv
+        run: venv/bin/pip3 install -r requirements.txt
+
+      - name: Populate content, static, and template
+        run: cp -r content static template.html -t $GITHUB_WORKSPACE/sidewinder
 
       - name: Build site
-        shell: bash
+        working-directory: $GITHUB_WORKSPACE/sidewinder
         run: venv/bin/python3 src/main.py
+
+     - name: Upload static files as artifact
+        id: deployment
+        uses: actions/upload-pages-artifact@v3 # or specific "vX.X.X" version tag for this action
+        with:
+          path: "$GITHUB_WORKSPACE/sidewinder/public/"
+
+  # Deploy job
+  deploy:
+    # Add a dependency to the build job
+    needs: build
+
+    # Grant GITHUB_TOKEN the permissions required to make a Pages deployment
+    permissions:
+      pages: write      # to deploy to Pages
+      id-token: write   # to verify the deployment originates from an appropriate source
+
+    # Deploy to the github-pages environment
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    # Specify runner + deployment step
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4 # or specific "vX.X.X" version tag for this action      
           
